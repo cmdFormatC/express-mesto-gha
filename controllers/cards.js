@@ -1,11 +1,12 @@
-const Card = require('../models/card');
+const Card = require('../models/cards');
+const { handleError } = require('../utils/handleError');
 
 const getCards = async (req, res) => {
   try {
     const cards = await Card.find({});
     res.send({ data: cards });
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    handleError(err, res, { badRequestErrorText: 'Некорректный запрос', internalServerErrorText: 'Ошибка на сервере' });
   }
 };
 
@@ -17,7 +18,7 @@ const deleteCard = async (req, res) => {
     }
     res.send({ data: card });
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    handleError(err, res, { badRequestErrorText: 'Некорректный запрос', internalServerErrorText: 'Ошибка на сервере' });
   }
 };
 
@@ -32,7 +33,7 @@ const createCard = async (req, res) => {
     const card = await Card.create({ name, link });
     res.send({ data: card });
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    handleError(err, res, { badRequestErrorText: 'Некорректный запрос', internalServerErrorText: 'Ошибка на сервере' });
   }
 };
 
@@ -41,7 +42,7 @@ const likeCard = async (req, res) => {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
       { $addToSet: { likes: req.user._id } },
-      { new: true }
+      { new: true },
     );
 
     if (!card) {
@@ -50,7 +51,7 @@ const likeCard = async (req, res) => {
 
     res.send({ data: card });
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    handleError(err, res, { badRequestErrorText: 'Некорректный запрос', internalServerErrorText: 'Ошибка на сервере' });
   }
 };
 const deleteLikeFromCard = async (req, res) => {
@@ -58,7 +59,7 @@ const deleteLikeFromCard = async (req, res) => {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
       { $pull: { likes: req.user._id } },
-      { new: true }
+      { new: true },
     );
 
     if (!card) {
@@ -67,7 +68,7 @@ const deleteLikeFromCard = async (req, res) => {
 
     res.send({ data: card });
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    handleError(err, res, { badRequestErrorText: 'Некорректный запрос', internalServerErrorText: 'Ошибка на сервере' });
   }
 };
 

@@ -1,11 +1,5 @@
 const User = require('../models/user');
-
-const handleError = (err, res, { badRequestErrorText, internalServerErrorText }) => {
-  if (err.name === 'ValidationError') {
-    return res.status(400).send({ message: badRequestErrorText });
-  }
-  res.status(500).send({ message: internalServerErrorText });
-}
+const { handleError } = require('../utils/handleError');
 
 const getUsers = (req, res) => {
   User.find({})
@@ -17,7 +11,7 @@ const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params._id);
     if (!user) {
-      return res.status(404).send({ message: "Пользователь по указанному _id не найден." });
+      return res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
     }
     res.send({ data: user });
   } catch (err) {
@@ -30,7 +24,7 @@ const createUser = async (req, res) => {
 
   try {
     const user = await User.create({ name, about, avatar });
-    res.send({ data: user });
+    res.status(201).send({ data: user });
   } catch (err) {
     handleError(err, res, { badRequestErrorText: 'Переданы некорректные данные при создании пользователя', internalServerErrorText: 'Ошибка на сервере' });
   }
@@ -42,13 +36,17 @@ const updateUserProfile = async (req, res) => {
   if (req.body.about) update.about = req.body.about;
 
   if (Object.keys(update).length === 0) {
-    return res.status(400).send({message: "Переданы некорректные данные при обновлении профиля."});
+    return res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
   }
 
   try {
-    const user = await User.findByIdAndUpdate(req.params._id, update, { new: true });
+    const user = await User.findByIdAndUpdate(
+      req.params._id,
+      update,
+      { new: true, runValidators: true },
+    );
     if (!user) {
-      return res.status(404).send({ message: "Пользователь по указанному _id не найден." });
+      return res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
     }
     res.send({ data: user });
   } catch (err) {
@@ -59,20 +57,19 @@ const updateUserProfile = async (req, res) => {
 const updateUserAvatar = async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
-      req.params._id, 
-      { avatar: req.body.avatar }, 
-      { new: true }
+      req.params._id,
+      { avatar: req.body.avatar },
+      { new: true },
     );
 
     if (!user) {
-      return res.status(404).send({ message: "Пользователь по указанному _id не найден." });
+      return res.status(404).send({ message: 'Пользователь по указанному _id не найден. ' });
     }
-    
     res.send({ data: user });
   } catch (err) {
-    handleError(err, res, { 
-      badRequestErrorText: 'Переданы некорректные данные при обновлении аватара', 
-      internalServerErrorText: 'Ошибка на сервере' 
+    handleError(err, res, {
+      badRequestErrorText: 'Переданы некорректные данные при обновлении аватара',
+      internalServerErrorText: 'Ошибка на сервере',
     });
   }
 };

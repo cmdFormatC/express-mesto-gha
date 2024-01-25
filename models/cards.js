@@ -9,7 +9,6 @@ const cardSchema = new mongoose.Schema({
   },
   link: {
     type: String,
-    maxlength: 30,
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -24,6 +23,6 @@ const cardSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-})
+});
 
 module.exports = mongoose.model('card', cardSchema);

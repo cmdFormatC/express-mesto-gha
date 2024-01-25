@@ -1,6 +1,6 @@
 module.exports = {
   env: {
-    browser: true,
+    node: true,
     es2021: true,
   },
   extends: ['eslint:recommended', 'airbnb-base'],
@@ -20,6 +20,8 @@ module.exports = {
     sourceType: 'module',
   },
   rules: {
-    allow: ['_id'],
+    'no-underscore-dangle': ['error', { allow: ['_id', '_cardId'] }],
+    'arrow-parens': ['error', 'as-needed'],
+    'consistent-return': 'off',
   },
 };
