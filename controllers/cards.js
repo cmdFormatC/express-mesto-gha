@@ -1,43 +1,44 @@
 const Card = require('../models/cards');
-const { handleError } = require('../utils/handleError');
 
-const getCards = async (req, res) => {
+const { handleErrorConstructor, handleDbErrors } = require('../utils/handleErrorTools');
+
+const getCards = async (req, res, next) => {
   try {
     const cards = await Card.find({});
     res.send({ data: cards });
   } catch (err) {
-    handleError(err, res, { badRequestErrorText: 'Некорректный запрос', internalServerErrorText: 'Ошибка на сервере' });
+    next(handleDbErrors(err, 'Некорректный запрос'));
   }
 };
 
-const deleteCard = async (req, res) => {
+const deleteCard = async (req, res, next) => {
   try {
     const card = await Card.findByIdAndRemove(req.params._cardId);
     if (!card) {
-      return res.status(404).send({ message: 'Карточка не найдена' });
+      return handleErrorConstructor(404, 'Карточка не найдена');
     }
     res.send({ data: card });
   } catch (err) {
-    handleError(err, res, { badRequestErrorText: 'Некорректный запрос', internalServerErrorText: 'Ошибка на сервере' });
+    next(handleDbErrors(err, 'Некорректный запрос'));
   }
 };
 
-const createCard = async (req, res) => {
+const createCard = async (req, res, next) => {
   const { name, link } = req.body;
 
   if (!name || !link) {
-    return res.status(400).send({ message: 'Некорректные данные' });
+    return handleErrorConstructor(400, 'Некорректные данные');
   }
 
   try {
     const card = await Card.create({ name, link });
     res.send({ data: card });
   } catch (err) {
-    handleError(err, res, { badRequestErrorText: 'Некорректный запрос', internalServerErrorText: 'Ошибка на сервере' });
+    next(handleDbErrors(err, 'Некорректный запрос'));
   }
 };
 
-const likeCard = async (req, res) => {
+const likeCard = async (req, res, next) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -46,15 +47,15 @@ const likeCard = async (req, res) => {
     );
 
     if (!card) {
-      return res.status(404).send({ message: 'Карточка не найдена' });
+      return handleErrorConstructor(404, 'Карточка не найдена');
     }
 
     res.send({ data: card });
   } catch (err) {
-    handleError(err, res, { badRequestErrorText: 'Некорректный запрос', internalServerErrorText: 'Ошибка на сервере' });
+    next(handleDbErrors(err, 'Некорректный запрос'));
   }
 };
-const deleteLikeFromCard = async (req, res) => {
+const deleteLikeFromCard = async (req, res, next) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -63,12 +64,12 @@ const deleteLikeFromCard = async (req, res) => {
     );
 
     if (!card) {
-      return res.status(404).send({ message: 'Карточка не найдена' });
+      return handleErrorConstructor(404, 'Карточка не найдена');
     }
 
     res.send({ data: card });
   } catch (err) {
-    handleError(err, res, { badRequestErrorText: 'Некорректный запрос', internalServerErrorText: 'Ошибка на сервере' });
+    next(handleDbErrors(err, 'Некорректный запрос'));
   }
 };
 
