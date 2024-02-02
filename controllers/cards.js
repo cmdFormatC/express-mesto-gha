@@ -7,34 +7,38 @@ const getCards = async (req, res, next) => {
     const cards = await Card.find({});
     res.send({ data: cards });
   } catch (err) {
-    next(handleDbErrors(err, 'Некорректный запрос'));
+    return next(handleDbErrors(err, 'Некорректный запрос'));
   }
 };
 
 const deleteCard = async (req, res, next) => {
   try {
-    const card = await Card.findByIdAndRemove(req.params._cardId);
+    const card = await Card.findById(req.params.cardId);
     if (!card) {
-      return handleErrorConstructor(404, 'Карточка не найдена');
+      return next(handleErrorConstructor(404, 'Карточка не найдена'));
     }
+
+    if (req.user._id !== card.owner.toString()) {
+      return next(handleErrorConstructor(403, 'Нельзя удалить не свою карточку'));
+    }
+    await Card.findByIdAndDelete(req.params.cardId);
     res.send({ data: card });
   } catch (err) {
-    next(handleDbErrors(err, 'Некорректный запрос'));
+    return next(handleDbErrors(err, 'Некорректный запрос'));
   }
 };
 
 const createCard = async (req, res, next) => {
   const { name, link } = req.body;
-
   if (!name || !link) {
-    return handleErrorConstructor(400, 'Некорректные данные');
+    return next(handleErrorConstructor(400, 'Некорректные данные'));
   }
 
   try {
-    const card = await Card.create({ name, link });
+    const card = await Card.create({ name, link, owner: req.user._id });
     res.send({ data: card });
   } catch (err) {
-    next(handleDbErrors(err, 'Некорректный запрос'));
+    return next(handleDbErrors(err, 'Некорректный запрос'));
   }
 };
 
@@ -47,12 +51,12 @@ const likeCard = async (req, res, next) => {
     );
 
     if (!card) {
-      return handleErrorConstructor(404, 'Карточка не найдена');
+      return next(handleErrorConstructor(404, 'Карточка не найдена'));
     }
 
     res.send({ data: card });
   } catch (err) {
-    next(handleDbErrors(err, 'Некорректный запрос'));
+    return next(handleDbErrors(err, 'Некорректный запрос'));
   }
 };
 const deleteLikeFromCard = async (req, res, next) => {
@@ -64,12 +68,12 @@ const deleteLikeFromCard = async (req, res, next) => {
     );
 
     if (!card) {
-      return handleErrorConstructor(404, 'Карточка не найдена');
+      return next(handleErrorConstructor(404, 'Карточка не найдена'));
     }
 
     res.send({ data: card });
   } catch (err) {
-    next(handleDbErrors(err, 'Некорректный запрос'));
+    return next(handleDbErrors(err, 'Некорректный запрос'));
   }
 };
 

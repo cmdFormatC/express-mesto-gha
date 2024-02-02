@@ -6,9 +6,8 @@ const { JWT_SECRET } = process.env;
 
 module.exports = (req, res, next) => {
   const token = req.cookies.jwt;
-
   if (!token) {
-    return handleErrorConstructor(401, 'Токен авторизации отсутсвует или не действителен');
+    return next(handleErrorConstructor(401, 'Токен авторизации отсутсвует или не действителен'));
   }
 
   let payload;
@@ -16,7 +15,7 @@ module.exports = (req, res, next) => {
   try {
     payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
-    return handleErrorConstructor(401, 'Токен авторизации отсутсвует или не действителен');
+    return next(handleErrorConstructor(401, 'Токен авторизации отсутсвует или не действителен'));
   }
 
   req.user = payload;

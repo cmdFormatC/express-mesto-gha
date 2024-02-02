@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const { errors } = require('celebrate');
 
 const auth = require('./middlewares/auth');
 const { handleErrorConstructor } = require('./utils/handleErrorTools');
@@ -23,8 +24,11 @@ mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.post('/signin', login);
 app.post('/signup', createUser);
+
 app.use('/users', auth, require('./routes/users'));
 app.use('/cards', auth, require('./routes/cards'));
+
+app.use(errors());
 
 app.use('*', (req, res, next) => {
   next(handleErrorConstructor(404, 'Ресурс не найден'));
